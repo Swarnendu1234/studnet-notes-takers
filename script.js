@@ -101,10 +101,11 @@ async function render() {
       }
     });
 
-    // ✅ Render notes
-    notesList.innerHTML = notes.length > 0
-      ? notes.map((n) => {
-          const isImage = n.fileType && n.fileType.startsWith('image/');
+    // ✅ Render ALL files with preview buttons
+    const allFiles = [...notes, ...images];
+    notesList.innerHTML = allFiles.length > 0
+      ? allFiles.map((n) => {
+          const isImage = n.fileType && n.fileType.startsWith('image/') || n.fileName && (n.fileName.toLowerCase().endsWith('.png') || n.fileName.toLowerCase().endsWith('.jpg') || n.fileName.toLowerCase().endsWith('.jpeg'));
           const fileIcon = isImage ? '🖼️' : '📄';
           
           return `
@@ -123,9 +124,9 @@ async function render() {
           </div>
         </div>
       `}).join("")
-      : '<p>No notes uploaded yet.</p>';
+      : '<p>No files uploaded yet.</p>';
 
-    // ✅ Render images
+    // ✅ Render images only
     imagesList.innerHTML = images.length > 0
       ? images.map((i) => `
         <div class="card" data-id="${i.id}">
