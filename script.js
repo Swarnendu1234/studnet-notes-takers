@@ -116,11 +116,11 @@ async function render() {
           <div class="file-info">
             <small>${fileIcon} ${n.fileName} (${formatFileSize(n.fileSize)})</small>
           </div>
-          ${isImage ? `<img src="${n.viewUrl}" alt="${n.title}" style="width:100%;height:150px;object-fit:cover;border-radius:8px;margin:10px 0;cursor:pointer;" onclick="openPreview('${n.viewUrl}', '${n.fileType}')">` : ''}
+          ${isImage ? `<img src="${n.viewUrl}" alt="${n.title}" style="width:100%;height:150px;object-fit:cover;border-radius:8px;margin:10px 0;cursor:pointer;" onclick="window.open('${n.viewUrl}', '_blank')">` : ''}
           <div class="card-actions">
-            <button onclick="openPreview('${n.viewUrl}', '${n.fileType}')" class="view-btn">👁️ Preview</button>
-            <a href="${n.downloadUrl}" download class="download-btn">⬇️ Download</a>
-            <button onclick="deleteFile('${n.id}')" class="delete-btn">🗑️ Delete</button>
+            <button onclick="window.open('${n.viewUrl}', '_blank')" class="view-btn" style="background: linear-gradient(90deg, #7c3aed, #a855f7); color: white; border: none; padding: 0.8rem 1.4rem; border-radius: 10px; font-weight: 600; cursor: pointer; margin-right: 0.5rem;">👁️ Preview</button>
+            <a href="${n.downloadUrl}" download class="download-btn" style="background: linear-gradient(90deg, #7c3aed, #a855f7); color: white; text-decoration: none; padding: 0.8rem 1.4rem; border-radius: 10px; font-weight: 600; margin-right: 0.5rem;">⬇️ Download Note</a>
+            <button onclick="deleteFile('${n.id}')" class="delete-btn" style="background: #ef4444; color: white; border: none; padding: 0.8rem 1.4rem; border-radius: 10px; font-weight: 600; cursor: pointer;">🗑️ Delete</button>
           </div>
         </div>
       `}).join("")
