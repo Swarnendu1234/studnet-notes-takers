@@ -103,22 +103,26 @@ async function render() {
 
     // ✅ Render notes
     notesList.innerHTML = notes.length > 0
-      ? notes.map((n) => `
+      ? notes.map((n) => {
+          const isImage = n.fileType && n.fileType.startsWith('image/');
+          const fileIcon = isImage ? '🖼️' : '📄';
+          
+          return `
         <div class="card" data-id="${n.id}">
           <h3>${n.title}</h3>
           <div class="meta">${n.subject || "General"}</div>
           <p>${n.desc || ""}</p>
           <div class="file-info">
-            <small>📄 ${n.fileName} (${formatFileSize(n.fileSize)})</small>
+            <small>${fileIcon} ${n.fileName} (${formatFileSize(n.fileSize)})</small>
           </div>
-
+          ${isImage ? `<img src="${n.viewUrl}" alt="${n.title}" style="width:100%;height:150px;object-fit:cover;border-radius:8px;margin:10px 0;cursor:pointer;" onclick="openPreview('${n.viewUrl}', '${n.fileType}')">` : ''}
           <div class="card-actions">
             <button onclick="openPreview('${n.viewUrl}', '${n.fileType}')" class="view-btn">👁️ Preview</button>
             <a href="${n.downloadUrl}" download class="download-btn">⬇️ Download</a>
             <button onclick="deleteFile('${n.id}')" class="delete-btn">🗑️ Delete</button>
           </div>
         </div>
-      `).join("")
+      `}).join("")
       : '<p>No notes uploaded yet.</p>';
 
     // ✅ Render images
@@ -251,8 +255,8 @@ function openPreview(url, type) {
   } else if (type && type.startsWith("image/")) {
     container.innerHTML = `<img src="${url}" alt="Image Preview" style="max-width:100%;max-height:80vh;object-fit:contain;">`;
   } else {
-    // For images without explicit type or other files
-    container.innerHTML = `<img src="${url}" alt="Preview" style="max-width:100%;max-height:80vh;object-fit:contain;" onerror="this.outerHTML='<p>Cannot preview this file type.</p>'">`;
+    // Try to preview as image first (for files like PNG that might not have proper type)
+    container.innerHTML = `<img src="${url}" alt="Preview" style="max-width:100%;max-height:80vh;object-fit:contain;" onerror="this.outerHTML='<p>Cannot preview this file type. <a href=\"${url}\" target=\"_blank\">Open in new tab</a></p>'">`;
   }
 
   modal.classList.add("active");
