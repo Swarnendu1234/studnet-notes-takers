@@ -31,3 +31,4 @@ build/
 # IDE and editor folders
 .vscode/
 .idea/
+.vercel
