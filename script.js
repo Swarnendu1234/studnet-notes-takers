@@ -75,7 +75,7 @@ async function upload() {
 
 async function render() {
   try {
-    notesList.innerHTML = '<p>Loading notes...</p>';
+    notesList.innerHTML = '<p>Loading files...</p>';
     imagesList.innerHTML = '<p>Loading images...</p>';
 
     const res = await fetch("/api/data");
@@ -83,28 +83,9 @@ async function render() {
 
     const data = await res.json();
 
-    const notes = data.filter((x) => x.type === "note");
-    const images = data.filter((x) => x.type === "image");
-
-    // ✅ Fix Cloudinary URLs for inline preview (remove any auto-download flags)
-    notes.forEach((n) => {
-      if (n.fileUrl && n.fileUrl.includes("res.cloudinary.com/dwm9m3dwk")) {
-        // Clean up URL for inline display
-        n.viewUrl = n.fileUrl.replace(/\/upload\/.*?\//, "/upload/");
-        // Add explicit download version
-        n.downloadUrl = n.fileUrl.includes("?")
-          ? `${n.fileUrl}&fl_attachment=true`
-          : `${n.fileUrl}?fl_attachment=true`;
-      } else {
-        n.viewUrl = n.fileUrl;
-        n.downloadUrl = n.fileUrl;
-      }
-    });
-
-    // ✅ Render ALL files with preview buttons
-    const allFiles = [...notes, ...images];
-    notesList.innerHTML = allFiles.length > 0
-      ? allFiles.map((n) => {
+    // Show ALL files in notes section with preview
+    notesList.innerHTML = data.length > 0
+      ? data.map((n) => {
           const isImage = n.fileType && n.fileType.startsWith('image/') || n.fileName && (n.fileName.toLowerCase().endsWith('.png') || n.fileName.toLowerCase().endsWith('.jpg') || n.fileName.toLowerCase().endsWith('.jpeg'));
           const fileIcon = isImage ? '🖼️' : '📄';
           
@@ -116,17 +97,18 @@ async function render() {
           <div class="file-info">
             <small>${fileIcon} ${n.fileName} (${formatFileSize(n.fileSize)})</small>
           </div>
-          ${isImage ? `<img src="${n.viewUrl}" alt="${n.title}" style="width:100%;height:150px;object-fit:cover;border-radius:8px;margin:10px 0;cursor:pointer;" onclick="window.open('${n.viewUrl}', '_blank')">` : ''}
+          ${isImage ? `<img src="${n.fileUrl}" alt="${n.title}" style="width:100%;height:150px;object-fit:cover;border-radius:8px;margin:10px 0;cursor:pointer;" onclick="window.open('${n.fileUrl}', '_blank')">` : ''}
           <div class="card-actions">
-            <button onclick="window.open('${n.viewUrl}', '_blank')" class="view-btn" style="background: linear-gradient(90deg, #7c3aed, #a855f7); color: white; border: none; padding: 0.8rem 1.4rem; border-radius: 10px; font-weight: 600; cursor: pointer; margin-right: 0.5rem;">👁️ Preview</button>
-            <a href="${n.downloadUrl}" download class="download-btn" style="background: linear-gradient(90deg, #7c3aed, #a855f7); color: white; text-decoration: none; padding: 0.8rem 1.4rem; border-radius: 10px; font-weight: 600; margin-right: 0.5rem;">⬇️ Download Note</a>
+            <button onclick="window.open('${n.fileUrl}', '_blank')" class="view-btn" style="background: linear-gradient(90deg, #7c3aed, #a855f7); color: white; border: none; padding: 0.8rem 1.4rem; border-radius: 10px; font-weight: 600; cursor: pointer; margin-right: 0.5rem;">👁️ Preview</button>
+            <a href="${n.fileUrl}" download class="download-btn" style="background: linear-gradient(90deg, #7c3aed, #a855f7); color: white; text-decoration: none; padding: 0.8rem 1.4rem; border-radius: 10px; font-weight: 600; margin-right: 0.5rem;">⬇️ Download</a>
             <button onclick="deleteFile('${n.id}')" class="delete-btn" style="background: #ef4444; color: white; border: none; padding: 0.8rem 1.4rem; border-radius: 10px; font-weight: 600; cursor: pointer;">🗑️ Delete</button>
           </div>
         </div>
       `}).join("")
       : '<p>No files uploaded yet.</p>';
 
-    // ✅ Render images only
+    // Show only images in images section
+    const images = data.filter((x) => x.type === "image");
     imagesList.innerHTML = images.length > 0
       ? images.map((i) => `
         <div class="card" data-id="${i.id}">
@@ -138,24 +120,22 @@ async function render() {
           </div>
           <img src="${i.fileUrl}" alt="${i.title}" 
                style="width:100%;height:200px;object-fit:cover;border-radius:8px;margin:10px 0;cursor:pointer;"
-               onclick="openPreview('${i.fileUrl}', '${i.fileType}')">
+               onclick="window.open('${i.fileUrl}', '_blank')">
           <div class="card-actions">
-            <button onclick="openPreview('${i.fileUrl}', '${i.fileType}')" class="view-btn">👁️ Preview</button>
-            <a href="${i.fileUrl}" download class="download-btn">⬇️ Download</a>
-            <button onclick="deleteFile('${i.id}')" class="delete-btn">🗑️ Delete</button>
+            <button onclick="window.open('${i.fileUrl}', '_blank')" class="view-btn" style="background: linear-gradient(90deg, #7c3aed, #a855f7); color: white; border: none; padding: 0.8rem 1.4rem; border-radius: 10px; font-weight: 600; cursor: pointer; margin-right: 0.5rem;">👁️ Preview</button>
+            <a href="${i.fileUrl}" download class="download-btn" style="background: linear-gradient(90dx, #7c3aed, #a855f7); color: white; text-decoration: none; padding: 0.8rem 1.4rem; border-radius: 10px; font-weight: 600; margin-right: 0.5rem;">⬇️ Download</a>
+            <button onclick="deleteFile('${i.id}')" class="delete-btn" style="background: #ef4444; color: white; border: none; padding: 0.8rem 1.4rem; border-radius: 10px; font-weight: 600; cursor: pointer;">🗑️ Delete</button>
           </div>
         </div>
       `).join("")
       : '<p>No images uploaded yet.</p>';
 
-    updateCounts(notes.length, images.length);
+    updateCounts(data.length, images.length);
   } catch (error) {
     console.error("Render error:", error);
-    notesList.innerHTML = `<p>Unable to load notes. ${error.message}</p>`;
+    notesList.innerHTML = `<p>Unable to load files. ${error.message}</p>`;
     imagesList.innerHTML = `<p>Unable to load images. ${error.message}</p>`;
   }
-
-
 }
 
 
