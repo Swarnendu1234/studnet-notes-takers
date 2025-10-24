@@ -312,7 +312,7 @@
     © 2025 CampusNotes — Designed by <b>Avilash Sinha Roy</b>
   </footer>
 
-  <script src="script.js" onerror="console.error('Script failed to load')"
+  <script src="script.js?v=2" onerror="console.error('Script failed to load')"
     onload="console.log('Script loaded successfully')"></script>
   <script>
     // Fallback script in case external JS doesn't load
@@ -331,6 +331,27 @@
         toggle.textContent = document.body.classList.contains('dark-theme') ? '☀️' : '🌙';
       }
     }
+    
+    // Force add preview buttons after page loads
+    setTimeout(() => {
+      const cards = document.querySelectorAll('.card');
+      cards.forEach(card => {
+        const actions = card.querySelector('.card-actions');
+        if (actions && !actions.querySelector('.view-btn')) {
+          const downloadBtn = actions.querySelector('.download-btn');
+          if (downloadBtn) {
+            const previewBtn = document.createElement('button');
+            previewBtn.className = 'view-btn';
+            previewBtn.innerHTML = '👁️ Preview';
+            previewBtn.onclick = () => {
+              const url = downloadBtn.href;
+              window.open(url, '_blank');
+            };
+            actions.insertBefore(previewBtn, downloadBtn);
+          }
+        }
+      });
+    }, 2000);
   </script>
   <!-- 🔍 Preview Modal -->
 <div id="previewModal" class="preview-modal" onclick="closePreview(event)">
